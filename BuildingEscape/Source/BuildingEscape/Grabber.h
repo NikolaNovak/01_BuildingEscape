@@ -45,7 +45,6 @@ private:
 	void Release();
 	void FindPhysicsHandleComponent();
 	void SetupInputComponent();
-	FVector GetReachLineStart() const;
-	FVector GetReachLineEnd() const;
 	FHitResult GetFirstPhysicsBodyInReach() const;
+	FTwoVectors GetLineTracePoints() const;
 };

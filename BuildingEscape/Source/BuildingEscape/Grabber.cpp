@@ -25,11 +25,12 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!PhysicsHandle) { return; }
 	//if the physics handle is attached
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		//move the object we are holding
-		PhysicsHandle->SetTargetLocation(GetReachLineEnd());
+		PhysicsHandle->SetTargetLocation(GetLineTracePoints().v2);
 	}
 }
 
@@ -79,33 +80,32 @@ void UGrabber::SetupInputComponent()
 	}
 }
 
-FVector UGrabber::GetReachLineStart() const
-{
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
-	return PlayerViewPointLocation;
-}
-
-FVector UGrabber::GetReachLineEnd() const
-{
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
-	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-}
-
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 {
+	/// Line-trace (AKA ray-cast) out to reach distance
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
-
+	FTwoVectors TracePoints = GetLineTracePoints();
+	//with C++17
+	//auto [Start, End] = GetLineTracePoints();
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT HitResult,
-		GetReachLineStart(),
-		GetReachLineEnd(),
+		TracePoints.v1, //Start
+		TracePoints.v2, //End
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParameters
 	);
 	return HitResult;
+}
+
+FTwoVectors UGrabber::GetLineTracePoints() const
+{
+	FVector StartLocation;
+	FRotator PlayerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT StartLocation,
+		OUT PlayerViewPointRotation
+	);
+	FVector EndLocation = StartLocation + PlayerViewPointRotation.Vector() * Reach;
+	return FTwoVectors(StartLocation, EndLocation);
 }
