@@ -44,6 +44,7 @@ void UGrabber::Grab()
 	//if we hit something then attach a physics handle
 	if (ActorHit)
 	{
+		if (!PhysicsHandle) { return; }
 		PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab, //ComponentToGrab
 			NAME_None, //grab what bone name, if any
@@ -54,6 +55,7 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	if (!PhysicsHandle) { return; }
 	PhysicsHandle->ReleaseComponent();
 }
 
