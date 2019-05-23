@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/PrimitiveComponent.h"
 #include "OpenDoor.generated.h"
 
 
@@ -42,7 +43,10 @@ private:
 	float DoorCloseDelay = 1.f;
 
 	float LastDoorOpenTime;
+	float TriggerMass = 50.f;
 
-	AActor* ActorThatOpens; //remember pawn from actor
-	AActor* Owner;
+	AActor* Owner; //the owning door
+
+	// returns total mass in kg
+	float GetTotalMassOfActorsOnPlate();
 };
